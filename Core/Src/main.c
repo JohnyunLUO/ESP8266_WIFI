@@ -89,7 +89,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	int len=0;
-	char tmp;
+	char tmp[4];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -132,19 +132,19 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	// wifi to pc
-	if(HAL_UART_Receive_IT(&huart1, &tmp, 1)==HAL_OK){
-		QueueWrite(&wifiRxQueue, tmp);
+	if(HAL_UART_Receive_IT(&huart1, &tmp[0], 1)==HAL_OK){
+		QueueWrite(&wifiRxQueue, tmp[0]);
 	}
-	if(QueueRead(&wifiRxQueue, &tmp)){
-		HAL_UART_Transmit(&huart2, &tmp, 1, 100);
+	if(QueueRead(&wifiRxQueue, &tmp[1])){
+		HAL_UART_Transmit(&huart2, &tmp[1], 1, 100);
 	}
 
 	//pc to wifi
-	if(HAL_UART_Receive_IT(&huart2, &tmp, 1)==HAL_OK){
-		QueueWrite(&pcRxQueue, tmp);
+	if(HAL_UART_Receive_IT(&huart2, &tmp[2], 1)==HAL_OK){
+		QueueWrite(&pcRxQueue, tmp[2]);
 	}
-	if(QueueRead(&pcRxQueue, &tmp)){
-		HAL_UART_Transmit(&huart1, &tmp, 1, 100);
+	if(QueueRead(&pcRxQueue, &tmp[3])){
+		HAL_UART_Transmit(&huart1, &tmp[3], 1, 100);
 	}
 
   }
