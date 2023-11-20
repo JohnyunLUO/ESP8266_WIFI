@@ -8,24 +8,26 @@
 #include "queue.h"
 
 void QueueInit(Queue_t *buffer, char *buf, int buf_size) {
-  Queue_ASSERT(Queue_IS_POWER_OF_TWO(buf_size) == 1);
-  buffer->buffer = buf;
-  buffer->buffer_mask = buf_size - 1;
-  buffer->tail_index = 0;
-  buffer->head_index = 0;
+  buffer->data = buf;
+  buffer->capacity = buf_size;
+  buffer->back = -1;
+  buffer->front = 0;
+  buffer->size = 0;
 }
 
 void QueueWrite(Queue_t *buffer, char data) {
-  /* Is buffer full? */
-  if(QueueIsFull(buffer)) {
-    /* Is going to overwrite the oldest byte */
-    /* Increase tail index */
-    buffer->tail_index = ((buffer->tail_index + 1) & Queue_MASK(buffer));
-  }
-
-  /* Place data in buffer */
-  buffer->buffer[buffer->head_index] = data;
-  buffer->head_index = ((buffer->head_index + 1) & Queue_MASK(buffer));
+	int position = (buffer->back + 1) % buffer->capacity;
+	if (buffer->size < buffer->capacity)
+	{
+		buffer->back = position;
+		buffer->data[buffer->back] = data;
+		buffer->size++;
+		return;
+	}
+	else
+	{
+		return;
+	}
 }
 
 void QueueWriteBlock(Queue_t *buffer, const char *data, int size) {
@@ -37,14 +39,19 @@ void QueueWriteBlock(Queue_t *buffer, const char *data, int size) {
 }
 
 uint8_t QueueRead(Queue_t *buffer, char *data) {
-  if(QueueIsEmpty(buffer)) {
-    /* No items */
-    return 0;
-  }
-
-  *data = buffer->buffer[buffer->tail_index];
-  buffer->tail_index = ((buffer->tail_index + 1) & Queue_MASK(buffer));
-  return 1;
+	int position = (buffer->front+ 1) % buffer->capacity;
+	if (buffer->size>0)
+	{
+		int front_element = buffer->data[buffer->front];
+		buffer->front = position;
+		buffer->size--;
+		*data = front_element;
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 int QueueReadBlock(Queue_t *buffer, char *data, int len) {

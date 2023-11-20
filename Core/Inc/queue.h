@@ -18,38 +18,19 @@ extern "C"
 {
 #endif
 
-#define Queue_ASSERT(x) assert(x)
-
-/**
- * Checks if the buffer_size is a power of two.
- * Due to the design only <tt> RING_BUFFER_SIZE-1 </tt> items
- * can be contained in the buffer.
- * buffer_size must be a power of two.
-*/
-#define Queue_IS_POWER_OF_TWO(buffer_size) ((buffer_size & (buffer_size - 1)) == 0)
-
-/**
- * Used as a modulo operator
- * as <tt> a % b = (a & (b − 1)) </tt>
- * where \c a is a positive index in the buffer and
- * \c b is the (power of two) size of the buffer.
- */
-#define Queue_MASK(rb) (rb->buffer_mask)
-
 /**
  * Structure which holds a ring buffer.
  * The buffer contains a buffer array
  * as well as metadata for the ring buffer.
  */
 typedef struct {
-  /** Buffer memory. */
-  char *buffer;
-  /** Buffer mask. */
-  int buffer_mask;
-  /** Index of tail. */
-  int tail_index;
-  /** Index of head. */
-  int head_index;
+	unsigned int back;	    // The next free position in the queue
+							// (i.e. the end or tail of the line)
+	unsigned int front;	    // Current 'head' of the queue
+							// (i.e. the front or head of the line)
+	unsigned int size;	    // How many total elements we have enqueued.
+	unsigned int capacity;  // Number of items the queue can hold
+	char* data;             // The 'integer' data our queue holds
 }Queue_t;
 
 /**
@@ -100,7 +81,7 @@ int QueueReadBlock(Queue_t *buffer, char *data, int len);
  * @return 1 if empty; 0 otherwise.
  */
 inline uint8_t QueueIsEmpty(Queue_t *buffer) {
-  return (buffer->head_index == buffer->tail_index);
+	return (buffer->size==0);
 }
 
 /**
@@ -109,7 +90,7 @@ inline uint8_t QueueIsEmpty(Queue_t *buffer) {
  * @return 1 if full; 0 otherwise.
  */
 inline uint8_t QueueIsFull(Queue_t *buffer) {
-  return ((buffer->head_index - buffer->tail_index) & Queue_MASK(buffer)) == Queue_MASK(buffer);
+	return (buffer->size == buffer->capacity);
 }
 
 /**
@@ -118,7 +99,7 @@ inline uint8_t QueueIsFull(Queue_t *buffer) {
  * @return The number of items in the ring buffer.
  */
 inline int QueueNumItems(Queue_t *buffer) {
-  return ((buffer->head_index - buffer->tail_index) & Queue_MASK(buffer));
+	return buffer->size;
 }
 
 #ifdef __cplusplus

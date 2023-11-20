@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "queue.h"
+#include "ESP8266.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -36,6 +37,17 @@
  | O CH_EN -> 3.3V   |       GPIO2    O |
  | O RST             |       GPIO0    O |
  | O VCC   -> 3.3V   | D8 <- RX       O |
+//netsh wlan set hostednetwork mode=allow ssid=A123  key=u9923001
+//列出基地台:  AT+CWLAP
+//和WIFI連線:  AT+CWJAP="612-2","u9923001"
+//查詢IP:  AT+CIFSR
+//發送封包步驟:
+//建立TCP連線:  AT+CIPSTART="TCP","192.168.0.168",8080
+//設定傳送字數:  AT+CIPSEND=29
+//設定傳送的內容:  GET /192.168.0.168:8080?test=1
+//發送內容並結束TCP連線: AT+CIPCLOSE
+//結束WIFI連線: AT+CWQAP
+//AT+CIPSTATUS
 
 */
 /* USER CODE END PTD */
@@ -120,7 +132,6 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  //HAL_UART_Receive_IT(&huart2, &tmp, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -132,17 +143,17 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	// wifi to pc
-	if(HAL_UART_Receive_IT(&huart1, &tmp[0], 1)==HAL_OK){
+	/*if(HAL_UART_Receive_IT(&huart1, &tmp[0], 1)==HAL_OK){
 		QueueWrite(&wifiRxQueue, tmp[0]);
-	}
+	}*/
 	if(QueueRead(&wifiRxQueue, &tmp[1])){
 		HAL_UART_Transmit(&huart2, &tmp[1], 1, 100);
 	}
 
 	//pc to wifi
-	if(HAL_UART_Receive_IT(&huart2, &tmp[2], 1)==HAL_OK){
+	/*if(HAL_UART_Receive_IT(&huart2, &tmp[2], 1)==HAL_OK){
 		QueueWrite(&pcRxQueue, tmp[2]);
-	}
+	}*/
 	if(QueueRead(&pcRxQueue, &tmp[3])){
 		HAL_UART_Transmit(&huart1, &tmp[3], 1, 100);
 	}
@@ -282,7 +293,7 @@ static void MX_USART2_UART_Init(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
+static void  MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */

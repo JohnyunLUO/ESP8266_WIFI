@@ -207,7 +207,15 @@ void SysTick_Handler(void)
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
-
+	uint8_t rx_data;
+	extern Queue_t wifiRxQueue;
+	// Check for Character Match interrupt
+	if ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE) != RESET) && (__HAL_UART_GET_IT_SOURCE(&huart2, UART_IT_RXNE) != RESET))
+	{
+		// Read the received byte
+		HAL_UART_Receive(&huart1, &rx_data, 1, HAL_MAX_DELAY);
+		QueueWrite(&wifiRxQueue, rx_data);
+	}
   /* USER CODE END USART1_IRQn 0 */
   HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART1_IRQn 1 */
@@ -221,7 +229,15 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   /* USER CODE BEGIN USART2_IRQn 0 */
-
+	uint8_t rx_data;
+	extern Queue_t pcRxQueue;
+	// Check for Character Match interrupt
+	if ((__HAL_UART_GET_FLAG(&huart2, UART_FLAG_RXNE) != RESET) && (__HAL_UART_GET_IT_SOURCE(&huart2, UART_IT_RXNE) != RESET))
+	{
+		// Read the received byte
+		HAL_UART_Receive(&huart2, &rx_data, 1, HAL_MAX_DELAY);
+		QueueWrite(&pcRxQueue, rx_data);
+	}
   /* USER CODE END USART2_IRQn 0 */
   HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
